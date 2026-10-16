@@ -56,4 +56,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest', '~> 5.0'
   spec.add_development_dependency 'mocha', '~> 2.0'
   spec.add_development_dependency "minitest-reporters", "~> 1.6"
+
+  # Specs del Railtie (spec/rails): una app Rails mínima con ActiveRecord sobre SQLite en memoria.
+  spec.add_development_dependency 'activerecord', '>= 6.1'
+  spec.add_development_dependency 'railties', '>= 6.1'
+  spec.add_development_dependency 'sqlite3', '>= 1.4'
 end

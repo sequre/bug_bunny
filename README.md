@@ -173,6 +173,10 @@ BugBunny.configure do |config|
   config.drain_idle_timeout  = 5
   config.drain_poll_interval = 0.1
 
+  # Rails only — wrap every consumed message in Rails.application.executor (default: true).
+  # See "Rails executor around each message" below. Set it from config/initializers.
+  config.consumer_rails_executor = true
+
   # Publisher Confirms — fail-loud defaults (both flags default to true).
   # Set to false to restore legacy log-only behavior.
   config.nack_raise   = true   # broker NACK → raise BugBunny::PublishNacked
@@ -360,6 +364,41 @@ class TracingMiddleware < BugBunny::ConsumerMiddleware::Base
 end
 
 BugBunny.consumer_middlewares.use TracingMiddleware
+```
+
+`use` appends to the chain; `prepend` puts a middleware first, wrapping every other one.
+
+### Rails executor around each message
+
+Inside Rails, the railtie registers `BugBunny::ConsumerMiddleware::RailsExecutor` **first** in the chain. It wraps every
+message in `Rails.application.executor.wrap`, the same way Sidekiq wraps each job. The consumer processes messages on
+Bunny's worker thread, which Rails does not know about; without the executor, what Rails keeps per thread survives from
+one message to the next:
+
+- `ActiveSupport::CurrentAttributes` (and whatever lives in them: Sentry tags, trace context, per-run metrics);
+- the ActiveRecord connection, which the thread keeps until it dies instead of returning it to the pool.
+
+It goes first (`prepend`, not `use`) so that it also wraps the middlewares that load per-thread state, like ExisRay's
+tracing middleware. Outside Rails nothing is registered and the consumer behaves as before.
+
+#### ⚠️ Behavior change
+
+**Errors that escape a message (Rails ≥ 7.0).** 
+An error that escapes the processing of a message (from a middleware, or from `handle_fatal_error`) still ends the same
+way: the delivery is rejected without requeue. **It is now also reported to `Rails.error`** with `handled: false`, because that is what `executor.wrap` does before re-raising. If you have a `Rails.error` subscriber
+(e.g. Sentry's), that error shows up there. Errors inside your controller actions are rescued by the consumer as
+before and are not affected.
+
+**The ActiveRecord query cache is on during each message**, and cleared when it ends: that is what the executor does
+(`ActiveRecord::QueryCache::ExecutorHooks`). On Bunny's thread it used to be off. A handler that re-reads the same row
+within one message, waiting for another process to change it (a poll), now gets the cached value; wrap that read in
+`ActiveRecord::Base.uncached { … }`.
+
+To turn it off (for example, if your consumer already wraps each message itself):
+
+```ruby
+# config/initializers/bug_bunny.rb
+BugBunny.configure { |config| config.consumer_rails_executor = false }
 ```
 
 ---

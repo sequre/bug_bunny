@@ -131,7 +131,10 @@ TEST_POOL = ConnectionPool.new(size: 5) { BugBunny.create_connection }
 ## Ejecutar Tests
 
 ```bash
-bundle exec rspec                           # Todos
+bundle exec rake                            # Todos: spec/ y spec/rails/ (cada una en su proceso)
+bundle exec rspec                           # spec/, sin Rails (.rspec excluye spec/rails/ si no se la pide)
+bundle exec rspec spec/rails                # Solo el Railtie (igual que rake spec:rails)
+bundle exec rake spec:rails                 # Solo el Railtie, con una app Rails mínima
 bundle exec rspec spec/unit/                # Solo unit
 bundle exec rspec spec/integration/         # Solo integration (requiere RabbitMQ)
 bundle exec rspec spec/unit/session_spec.rb # Archivo específico

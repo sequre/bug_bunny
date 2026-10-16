@@ -87,6 +87,15 @@ BugBunny.configuration.consumer_middlewares.use MyTracing::Middleware
 BugBunny.configuration.consumer_middlewares.use MyAuth::Middleware
 ```
 
+`use` agrega al final de la cadena; `prepend` pone al principio, envolviendo a todos.
+
+### Executor de Rails (automático en Rails)
+
+En Rails, el Railtie registra `BugBunny::ConsumerMiddleware::RailsExecutor` **primero**: cada mensaje corre dentro
+de `Rails.application.executor.wrap`, así que los `CurrentAttributes` no pasan de un mensaje al siguiente y la
+conexión de ActiveRecord vuelve al pool. Cambios de conducta: en Rails ≥ 7.0, un error que escapa del mensaje además
+se reporta a `Rails.error`, y la caché de queries de AR queda prendida durante cada mensaje. Se apaga con `config.consumer_rails_executor = false` (desde `config/initializers`).
+
 ### Crear Middleware
 
 ```ruby

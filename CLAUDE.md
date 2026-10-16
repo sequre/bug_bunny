@@ -61,7 +61,7 @@ BugBunny es una gema Ruby que implementa una capa de enrutamiento RESTful sobre 
 
 ### Testing
 - Framework: RSpec
-- Correr: `bundle exec rspec`
+- Correr: `bundle exec rake` (las dos suites: `spec/` y `spec/rails/`, cada una en su proceso; `bundle exec rspec` solo corre `spec/`, sin Rails)
 - Todo código nuevo debe tener tests.
 
 ### Releases o Nuevas versiones

@@ -46,7 +46,7 @@ Jerarquía (todas bajo `BugBunny::Error < ::StandardError`):
 |---|---|---|
 | `Error` | `::StandardError` | base — no se levanta directa salvo `resource.rb:122` (pool ausente) |
 | `CommunicationError` | `Error` | `bug_bunny.rb:96`, `session.rb:177,285`, `producer.rb:90`, `client.rb:168` — envuelve cualquier `Bunny::Exception` en la frontera del gem; original en `.cause` |
-| `ConfigurationError` | `Error` | `configuration.rb:282,289,297` — validación al final de `BugBunny.configure` |
+| `ConfigurationError` | `Error` | `configuration.rb:293,300,308` — validación al final de `BugBunny.configure` |
 | `PublishNacked` | `Error` | `producer.rb:235` — NACK del broker en modo `:confirmed`. Attrs: `path`, `nacked_count`. Opt-out `nack_raise: false` |
 | `PublishUnroutable` | `Error` | `producer.rb:325` — `basic.return` con `mandatory: true`. Attrs: `path`, `exchange`, `routing_key`, `reply_code`, `reply_text`, `correlation_id`. Opt-out `return_raise: false` |
 | `ClientError` | `Error` | `raise_error.rb:170` — 4xx no mapeado explícito |

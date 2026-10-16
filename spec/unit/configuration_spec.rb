@@ -188,6 +188,12 @@ RSpec.describe BugBunny::Configuration do
     end
   end
 
+  describe 'consumer_rails_executor flag' do
+    it 'tiene default true (el Railtie envuelve cada mensaje con el executor de Rails)' do
+      expect(BugBunny::Configuration.new.consumer_rails_executor).to be(true)
+    end
+  end
+
   describe 'nack_raise flag' do
     it 'tiene default true (raise PublishNacked en NACK)' do
       expect(BugBunny::Configuration.new.nack_raise).to be(true)

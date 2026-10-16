@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Nuevas funcionalidades
+- **Dentro de Rails, cada mensaje del Consumer corre dentro del executor de Rails (#70):** el railtie registra `BugBunny::ConsumerMiddleware::RailsExecutor`, que envuelve cada mensaje con `Rails.application.executor.wrap`, como Sidekiq con cada job. El Consumer procesa en el hilo de trabajo de Bunny, que Rails no conoce, así que hasta ahora lo que Rails guarda por hilo pasaba de un mensaje al siguiente: los `CurrentAttributes` (tags de Sentry, contexto de traza, métricas por ejecución) y la conexión de ActiveRecord (el hilo la retenía en vez de devolverla al pool). Fuera de Rails no se registra nada y la gema se comporta como antes.
+- **`config.consumer_rails_executor`** (default `true`): con `false`, el railtie no registra el middleware. Se lee al terminar de inicializar la app, así que se apaga desde `config/initializers`.
+- **`ConsumerMiddleware::Stack#prepend`:** registra un middleware al principio de la cadena. El del executor va primero así, para envolver también a los middlewares que cargan estado por hilo (el de tracing de ExisRay se registra en su propio `after_initialize`, en un orden que no controlamos).
+
+### ⚠️ Cambio de conducta (dentro de Rails)
+- **Rails ≥ 7.0 — un error que escapa del procesamiento de un mensaje ahora además se reporta a `Rails.error`** con `handled: false`, porque es lo que hace `executor.wrap` antes de relanzar. El camino del mensaje no cambia: se rechaza sin requeue, como desde 5.2.0. Los errores dentro de las acciones del controller los sigue rescatando el Consumer y no se ven afectados. **A mirar si consumís:** si tenés un subscriber de `Rails.error` (el de Sentry, por ejemplo), esos errores ahora aparecen ahí. Para volver a la conducta anterior: `config.consumer_rails_executor = false`.
+- **La caché de queries de ActiveRecord queda prendida durante cada mensaje** y se limpia al terminarlo: es lo que hace el executor (`ActiveRecord::QueryCache::ExecutorHooks`). En el hilo de Bunny estaba apagada. **A mirar si consumís:** un handler que relee la misma fila dentro de un mensaje esperando que otro proceso la cambie (un poll) ahora recibe el valor cacheado; usá `ActiveRecord::Base.uncached { … }` ahí. Se vuelve a la conducta anterior con `config.consumer_rails_executor = false`.
+
+### Tests
+- `spec/rails/`: una app Rails mínima (ActiveRecord sobre SQLite en memoria) prueba el railtie con Rails de verdad. Corre en su propio proceso (`rake spec:rails`), para que el resto de la suite siga probando la gema fuera de Rails; `rake` sin argumentos corre las dos, y `rspec` pelado corre `spec/` (un `.rspec` excluye `spec/rails/` salvo que se lo pida: `rspec spec/rails` la corre). Suma `railties`, `activerecord` y `sqlite3` como dependencias de desarrollo.
+
 ## [5.2.0] - 2026-09-29
 
 ### Nuevas funcionalidades
