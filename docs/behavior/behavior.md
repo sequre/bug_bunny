@@ -1,6 +1,6 @@
 # Comportamiento — bug_bunny
 
-> meta: artefacto `comportamiento` · RFC-007 (cadencia incremental default / completo on-demand) · generado dev-enrich 1.3.0 (backfill on-demand) · anclado a `35b075a` (squash de #65 en `main`) · cobertura: completa (7 flujos) · verificado por humano 2026-05-18 (base) · 2026-05-26 (refresco scoped: contrato de error wrapping post-#49) — incremento 2026-09-28 (#64, flujo `drain` + re-mapeo de `file:line`): escrito por el agente, **sin verificación humana todavía**
+> meta: artefacto `comportamiento` · RFC-007 (cadencia incremental default / completo on-demand) · generado dev-enrich 1.3.0 (backfill on-demand) · anclado a `35b075a` (squash de #65 en `main`) · cobertura: completa (7 flujos) · verificado por humano 2026-05-18 (base) · 2026-05-26 (refresco scoped: contrato de error wrapping post-#49) — incremento 2026-09-28 (#64, flujo `drain` + re-mapeo de `file:line`): escrito por el agente, **sin verificación humana todavía** — incremento 2026-10-16 (#70, flujo «Executor de Rails alrededor de cada mensaje»): escrito por el agente, **sin verificación humana todavía**
 
 ## 1. Resumen
 
@@ -17,6 +17,7 @@ Flujos de ejecución de la gema. Generado en **modo completo on-demand** (RFC-00
 | Consumer drain (drenar y salir) | **documentado** | `consumer.rb:158-176,271-290`, `drain_tracker.rb:28-47` |
 | Error handling / RemoteError | **documentado** | `consumer.rb:473-482`, `remote_error.rb`, `raise_error.rb:32-65` |
 | Client middleware stack (onion) | **documentado** | `middleware/stack.rb:43-47`, `base.rb:35-43` |
+| Executor de Rails alrededor de cada mensaje | **documentado** | `railtie.rb:44-49`, `consumer_middleware/rails_executor.rb:26-28`, `consumer.rb:227-238` |
 
 Cobertura completa a `35b075a`. Acreta incremental en cada PR que toque un flujo (default RFC-007). Ausencia futura ≠ inexistencia.
 
@@ -110,7 +111,7 @@ sequenceDiagram
     C->>H: start_health_check (touch file)
     C->>BR: q.subscribe(manual_ack, block:true) — LOOP
     loop por mensaje
-        BR->>C: deliver → consumer_middlewares → process_message
+        BR->>C: deliver → consumer_middlewares (en Rails: RailsExecutor primero) → process_message
     end
     H-->>S: cada interval: queue_declare(passive:true)
     H-->>S: falla → cierra session (fuerza reconnect)
@@ -145,6 +146,27 @@ sequenceDiagram
     end
 ```
 Contexto: `consumer.rb:158-176` (`drain`), `consumer.rb:271-290` (`consume_until_idle`), `drain_tracker.rb:28-47`. **Mensajes que llegan mientras drena:** entran en esta vuelta si llegan antes de que venza la ventana; los posteriores quedan para la próxima corrida. Una entrega ya recibida al cancelar se procesa antes de volver (Bunny drena su work pool al cancelar — leído de la fuente de Bunny 2.24.0, no medido); si igual no se ack-eara, **vuelve a la cola** (at-least-once). El conteo devuelto incluye los rechazados. **Una entrega que falla fuera del rescue de `process_message`** (un middleware, `handle_fatal_error`) se rechaza sin requeue en `handle_delivery` y se loguea `consumer.delivery_failed`; antes quedaba sin ack, trababa el prefetch y `drain` volvía "con éxito" con la cola llena (medido en el review de #65). **Con un flujo sostenido no retorna:** si los mensajes llegan más seguido que `drain_idle_timeout` la ventana no vence — la duración la decide el productor; se acota desde afuera (timeout del job). **La conexión es del llamador:** `drain` cierra el canal, no la conexión. **Distinto de `subscribe(block: false)`:** ese modo retorna al instante y el `ensure shutdown` cierra el canal, así que no consume nada (medido en #64).
+
+### Flujo: Executor de Rails alrededor de cada mensaje
+Dentro de Rails, cada entrega corre dentro de `Rails.application.executor.wrap`, como un job de Sidekiq. El Consumer procesa en el hilo de trabajo de Bunny, que Rails no conoce: sin esto, el estado por hilo pasa de un mensaje al siguiente (#70).
+
+```mermaid
+sequenceDiagram
+    participant BR as RabbitMQ
+    participant C as Consumer#handle_delivery
+    participant X as RailsExecutor
+    participant M as otros middlewares (p. ej. tracing de ExisRay)
+    participant P as process_message
+    BR->>C: deliver (hilo de Bunny)
+    C->>X: consumer_middlewares.call
+    X->>X: executor.wrap — al entrar: reset de CurrentAttributes
+    X->>M: @app.call
+    M->>P: core: rutea, llama al controller, ack/reject, reply RPC
+    P-->>X: vuelve
+    X->>X: al salir: reset de CurrentAttributes · la conexión de AR vuelve al pool · se limpia la caché de queries
+    Note over C: un error que escapa: wrap lo relanza (en Rails ≥ 7.1, antes lo reporta a Rails.error) → rescue de handle_delivery → reject sin requeue
+```
+Contexto: `railtie.rb:44-49` (registro en `after_initialize`, sólo si `config.consumer_rails_executor`), `consumer_middleware.rb:72-75` (`Stack#prepend`), `consumer_middleware/rails_executor.rb:26-28` (`wrap`), `consumer.rb:227-238` (`handle_delivery`: la cadena y su `rescue`). **Va primero** (`prepend`) porque el reset al entrar borraría el estado que un middleware anterior ya cargó: el de tracing de ExisRay carga `ExisRay::Tracer` (un `CurrentAttributes`) y se registra en su propio `after_initialize`, en un orden que no controlamos. El ack/reject queda adentro del wrap (vive en `process_message`); el `rescue` de `handle_delivery`, afuera. Si el hilo ya está dentro del executor, `wrap` no abre otro. **Fuera de Rails** el Railtie no se carga y la cadena no cambia. Probado con Rails de verdad en `spec/rails/consumer_rails_executor_spec.rb` (Rails 8.1).
 
 ### Flujo: Error handling / RemoteError
 Excepción no manejada en controller → serializada (clase/mensaje/backtrace[0..25]) → reply 500 → reconstruida client-side por `Middleware::RaiseError`.

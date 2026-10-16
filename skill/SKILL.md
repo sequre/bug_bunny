@@ -139,7 +139,8 @@ Por RFC-008 §2: no se fabrica la capa, no se borra contrato sin destino, no se 
 | `BugBunny::Producer` | Publica mensajes. Implementa tres modos: `#fire` (async), `#confirmed` (sync con `wait_for_confirms`) y `#rpc` (direct reply-to + `Concurrent::IVar`). |
 | `BugBunny::Client` | API de alto nivel. Pool de conexiones y middleware stack (onion architecture). |
 | `BugBunny::Consumer` | Subscribe loop con health check. Rutea mensajes via `BugBunny.routes`. |
-| `BugBunny::ConsumerMiddleware::Stack` | Pipeline de middlewares antes de `process_message`. Thread-safe. |
+| `BugBunny::ConsumerMiddleware::Stack` | Pipeline de middlewares antes de `process_message`. Thread-safe. `use` agrega al final; `prepend` pone al principio (envuelve a todos). |
+| `BugBunny::ConsumerMiddleware::RailsExecutor` | Sólo en Rails: envuelve cada mensaje con `Rails.application.executor.wrap`, para que el estado por hilo (`CurrentAttributes`, conexión de AR) no pase al siguiente. Lo registra el Railtie primero; se apaga con `config.consumer_rails_executor = false`. |
 | `BugBunny::Controller` | Base class tipo Rails. `before_action`, `around_action`, `after_action`, `rescue_from`, `render`. |
 | `BugBunny::Resource` | ORM sobre AMQP. `find`, `where`, `create`, `save`, `destroy`. ActiveModel validations y callbacks. |
 | `BugBunny::Routing::RouteSet` | DSL de rutas: `resources`, `namespace`, `member`, `collection`. |
@@ -147,7 +148,7 @@ Por RFC-008 §2: no se fabrica la capa, no se borra contrato sin destino, no se 
 | `BugBunny::Middleware::Stack` | Builder de middlewares client-side (onion architecture tipo Faraday). |
 | BugBunny::Request | Value object del mensaje saliente con metadata AMQP completa. |
 | BugBunny::OTel | Helpers para emitir campos siguiendo las OTel semantic conventions for messaging. |
-| BugBunny::Railtie | Integración Rails: autoload de `app/rabbit`, fork safety (Puma, Spring). |
+| BugBunny::Railtie | Integración Rails: autoload de `app/rabbit`, fork safety (Puma, Spring), executor de Rails alrededor de cada mensaje del Consumer. |
 
 ---
 
@@ -385,6 +386,9 @@ Cada slot del pool cachea su `Session` y `Producer` durante su vida útil. Esto 
 
 ### ¿Cómo funciona fork safety?
 `BugBunny::Railtie` registra hooks en `ActiveSupport::ForkTracker` (Rails 7.1+), `Puma.events.on_worker_boot` y `Spring.after_fork` para llamar `BugBunny.disconnect` y evitar sockets TCP heredados.
+
+### ¿Por qué el estado de un mensaje no pasa al siguiente?
+El Consumer procesa en el hilo de trabajo de Bunny, que Rails no conoce. En Rails, el Railtie registra `ConsumerMiddleware::RailsExecutor` al principio de la cadena (`prepend`), que envuelve cada mensaje con `Rails.application.executor.wrap`: al entrar y al salir se resetean los `CurrentAttributes`, y al salir la conexión de ActiveRecord vuelve al pool. Va primero para envolver también a los middlewares que cargan estado por hilo (el de tracing de ExisRay). **Cambio de conducta (Rails ≥ 7.1):** un error que escapa del mensaje además se reporta a `Rails.error` con `handled: false`; el mensaje se sigue rechazando sin requeue. Apagado: `config.consumer_rails_executor = false`.
 
 ---
 

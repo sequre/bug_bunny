@@ -61,6 +61,19 @@ module BugBunny
         self
       end
 
+      # Registra un middleware al principio de la cadena, para que envuelva a todos los demás. Thread-safe.
+      #
+      # Es para lo que tiene que quedar afuera de todo sin depender del orden en que se registran los
+      # demás: {RailsExecutor} va primero porque limpia el estado por hilo al arrancar, y un middleware
+      # que carga ese estado antes que él (el de tracing de ExisRay) lo perdería.
+      #
+      # @param middleware_class [Class] Clase que hereda de {Base}.
+      # @return [self]
+      def prepend(middleware_class)
+        @mutex.synchronize { @middlewares.unshift(middleware_class) }
+        self
+      end
+
       # @return [Boolean] `true` si no hay middlewares registrados. Thread-safe.
       def empty?
         @mutex.synchronize { @middlewares.empty? }

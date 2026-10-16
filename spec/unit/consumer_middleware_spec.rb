@@ -47,6 +47,19 @@ RSpec.describe BugBunny::ConsumerMiddleware::Stack do
     end
   end
 
+  describe '#prepend' do
+    it 'registra el middleware al principio: envuelve a los ya registrados' do
+      log = []
+      stack.use(tracking_middleware(log, :a))
+      result = stack.prepend(tracking_middleware(log, :first))
+
+      stack.call(delivery_info, properties, body) { log << :core }
+
+      expect(result).to be(stack)
+      expect(log).to eq(%i[first_before a_before core a_after first_after])
+    end
+  end
+
   describe '#empty?' do
     it 'retorna true cuando no hay middlewares' do
       expect(stack.empty?).to be(true)
