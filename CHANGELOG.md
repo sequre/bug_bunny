@@ -12,7 +12,7 @@
 - **La caché de queries de ActiveRecord queda prendida durante cada mensaje** y se limpia al terminarlo: es lo que hace el executor (`ActiveRecord::QueryCache::ExecutorHooks`). En el hilo de Bunny estaba apagada. **A mirar si consumís:** un handler que relee la misma fila dentro de un mensaje esperando que otro proceso la cambie (un poll) ahora recibe el valor cacheado; usá `ActiveRecord::Base.uncached { … }` ahí. Se vuelve a la conducta anterior con `config.consumer_rails_executor = false`.
 
 ### Tests
-- `spec/rails/`: una app Rails mínima (ActiveRecord sobre SQLite en memoria) prueba el railtie con Rails de verdad. Corre en su propio proceso (`rake spec:rails`), para que el resto de la suite siga probando la gema fuera de Rails; `rake` sin argumentos corre las dos, y `rspec` pelado corre `spec/` (un `.rspec` excluye `spec/rails/`). Suma `railties`, `activerecord` y `sqlite3` como dependencias de desarrollo.
+- `spec/rails/`: una app Rails mínima (ActiveRecord sobre SQLite en memoria) prueba el railtie con Rails de verdad. Corre en su propio proceso (`rake spec:rails`), para que el resto de la suite siga probando la gema fuera de Rails; `rake` sin argumentos corre las dos, y `rspec` pelado corre `spec/` (un `.rspec` excluye `spec/rails/` salvo que se lo pida: `rspec spec/rails` la corre). Suma `railties`, `activerecord` y `sqlite3` como dependencias de desarrollo.
 
 ## [5.2.0] - 2026-09-29
 

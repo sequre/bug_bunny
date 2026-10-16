@@ -1,1 +1,2 @@
---exclude-pattern spec/rails/**/*_spec.rb
+<%# spec/rails/ bootea Rails y corre en su propio proceso: se excluye salvo que se pida explícitamente. %>
+<%= '--exclude-pattern spec/rails/**/*_spec.rb' unless ARGV.any? { |arg| arg.start_with?('spec/rails') } %>

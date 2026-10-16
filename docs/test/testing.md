@@ -15,7 +15,8 @@
 Suite principal **RSpec** (`spec/`, 27 specs: 18 unit + 8 integration + 1 rails). Tarea
 `:test` legacy de **Minitest** (`test/`, 2 archivos) fuera del default y del CI.
 CI corre `bundle exec rake` en Ruby 3.4.4: el default corre `:spec` y `spec:rails`, cada una en
-su proceso. `bundle exec rspec` pelado corre `spec/` sin Rails (`.rspec` excluye `spec/rails/`). Sin coverage tool
+su proceso. `bundle exec rspec` pelado corre `spec/` sin Rails: `.rspec` excluye `spec/rails/` salvo que se lo pida
+explícitamente (`bundle exec rspec spec/rails` la corre, en su propio proceso). Sin coverage tool
 configurado.
 
 ## 2. Cuerpo
@@ -36,10 +37,10 @@ Sin tags declarados (`:slow`/`:js`) en la config de RSpec.
 | objetivo | comando | qué corre |
 |---|---|---|
 | default / CI | `bundle exec rake` | `:spec` (la suite RSpec menos `spec/rails/`) y después `spec:rails`, cada una en su proceso — `Rakefile:` `task default: [:spec, 'spec:rails']` |
-| `spec/` sin Rails | `bundle exec rspec` | todo `spec/` menos `spec/rails/` (lo excluye `.rspec`) |
+| `spec/` sin Rails | `bundle exec rspec` | todo `spec/` menos `spec/rails/` (lo excluye `.rspec` cuando no se pide `spec/rails` explícitamente) |
 | solo unit | `bundle exec rake spec:unit` | `spec/unit/**/*_spec.rb` |
 | solo integration | `bundle exec rake spec:integration` | `spec/integration/**/*_spec.rb` (requiere broker) |
-| Railtie (Rails) | `bundle exec rake spec:rails` | `spec/rails/**/*_spec.rb`, en su propio proceso (Rails se inicializa una vez por proceso); anula el `--exclude-pattern` de `.rspec` |
+| Railtie (Rails) | `bundle exec rake spec:rails` | `spec/rails/**/*_spec.rb`, en su propio proceso (Rails se inicializa una vez por proceso); equivale a `bundle exec rspec spec/rails` |
 | Minitest legacy | `bundle exec rake test` | `test/**/*_test.rb` |
 | CI | `.github/workflows/main.yml` → `bundle exec rake` | matrix Ruby `3.4.4`, `ruby/setup-ruby@v1` + `bundler-cache`, on push `main` + PR |
 
