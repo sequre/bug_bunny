@@ -1,7 +1,7 @@
 # Configuración — bug_bunny
 
 > meta: artefacto configuración · RFC-012 · generado `arch-structure` (inventario
-> §a-§e/§i) + `arch-enrich` (§f/§g/§h/§j) · anclado a `35b075a` (squash de #65 en `main`),
+> §a-§e/§i) + `arch-enrich` (§f/§g/§h/§j) · anclado a `67cca83` (squash de #71 en `main`),
 > `lib/bug_bunny/configuration.rb`, `lib/bug_bunny.rb`, `lib/bug_bunny/railtie.rb`,
 > `lib/bug_bunny/consumer.rb`,
 > `lib/generators/bug_bunny/install/templates/initializer.rb` · fecha 2026-06-30
@@ -11,9 +11,9 @@
 > citas `file:line` re-mapeadas al árbol de `35b075a` (el refactor de #64 las corrió).
 > Incremento 2026-10-16 (#70): `consumer_rails_executor` (`configuration.rb:196,277`,
 > `railtie.rb:44-51`); las citas de `configuration.rb` re-mapeadas por contenido (el atributo
-> nuevo corrió +10/+11 todo lo que viene después) y las de `railtie.rb` (§i); las citas son del
-> árbol de este PR: **re-anclar al SHA del squash al mergear**. Escrito por el agente, sin
-> verificación humana todavía.
+> nuevo corrió +10/+11 todo lo que viene después) y las de `railtie.rb` (§i). Re-anclado a
+> `67cca83` en el release 5.3.0: entre `35b075a` y `67cca83` sólo cambiaron los archivos de #70
+> (re-mapeados) y `version.rb` (no citado). Escrito por el agente, sin verificación humana todavía.
 
 ## 1. Resumen
 

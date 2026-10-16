@@ -5,7 +5,9 @@
 > a la RFC vigente) · anclado a `5697541`
 > (`.github/workflows/release.yml`, `*.gemspec`, `lib/bug_bunny/version.rb`,
 > `CHANGELOG.md`) · fecha 2026-07-31 · cobertura:
-> completa (régimen gema: build→publish, §e/f/g n/a).
+> completa (régimen gema: build→publish, §e/f/g n/a). Incremento 2026-10-16 (release 5.3.0):
+> versión actual y los pines de los consumidores (§h), re-medidos; escrito por el agente, sin
+> verificación humana todavía.
 
 ## 1. Resumen
 
@@ -21,9 +23,9 @@ out-of-repo).
 
 ### a. Hecho verificable
 
-- **Convención de versión:** SemVer `vX.X.X`. Actual: **5.2.0**.
-- **Source of truth:** tag remoto (`v5.2.0`) + **triple mirror**
-  `lib/bug_bunny/version.rb` (`VERSION = '5.2.0'`) ← `bug_bunny.gemspec:7`
+- **Convención de versión:** SemVer `vX.X.X`. Actual: **5.3.0**.
+- **Source of truth:** tag remoto (`v5.3.0`) + **triple mirror**
+  `lib/bug_bunny/version.rb` (`VERSION = '5.3.0'`) ← `bug_bunny.gemspec:7`
   (`spec.version = BugBunny::VERSION`).
 - **Changelog canónico:** `CHANGELOG.md` único.
 - **Patrón de trigger:** `gema-tag` (patrón 1).
@@ -34,7 +36,7 @@ out-of-repo).
 
 - **Convención:** SemVer `vX.X.X` (**con `v`** — distinto al servicio).
 - **Source of truth:** tag remoto canónico (`git tag --sort=-v:refname` →
-  `v5.2.0`).
+  `v5.3.0`).
 - **Mirror:** `lib/bug_bunny/version.rb` (`VERSION`), leído por
   `bug_bunny.gemspec:7` (`spec.version = BugBunny::VERSION`).
   `required_ruby_version >= 2.6.0` (`bug_bunny.gemspec:17`).
@@ -85,11 +87,12 @@ procedimiento per-repo porque no vive acá. Una versión yankeada se anotaría e
   `>= 5.1.0, < 5.2.0`, así que un minor **no entra** sin editar el `Gemfile`.
   Consecuencia operativa: un fix publicado como **patch** lo toman con
   `bundle update bug_bunny`; uno publicado como **minor** requiere tocar el pin
-  en cada consumidor. Estado medido el 2026-09-29 (Gemfiles de los clones del
+  en cada consumidor. Estado medido el 2026-10-16 (Gemfile y Gemfile.lock del default de cada clon del
   workspace): `box_manager_service` en `~> 5.1.1`; `box_acs_manager`,
-  `box_cluster_manager` y `box_radius_manager` en `~> 5.1.0` — o sea que
-  **5.2.0 no le entra a ninguno** sin tocar el pin. *(El estado anterior decía
-  `box_acs_manager`/`box_cluster_manager` en `~> 4.19.0`: ya no es así.)* Un cambio de contrato del gem (ej. el
+  `box_cluster_manager` y `box_radius_manager` en `~> 5.1.0`, los cuatro con 5.1.1 en el lock — o sea que
+  **ni 5.2.0 ni 5.3.0 le entran a ninguno** sin tocar el pin. `agent` sigue en `~> 4.11.1`, y el resto de
+  los consumidores (`olt_*`, `*_invoice_service`, `notification_sms_service`, `wispro_box_server`,
+  `wispro_lan`) en la línea 0.2.x. *(El 2026-09-29 la medición daba lo mismo para los cuatro de 5.x.)* Un cambio de contrato del gem (ej. el
   behavior-change de `4.18.0` — `Bunny::Exception` → `CommunicationError`, o la
   eliminación de `BugBunny::SecurityError` en `5.0.0`) obliga a los consumidores
   a migrar; el `CHANGELOG.md` lo documenta como breaking note. **Orden de

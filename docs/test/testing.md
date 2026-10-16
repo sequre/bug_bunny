@@ -1,13 +1,13 @@
 # Test — bug_bunny
 
 > meta: artefacto test · RFC-013 · generado `arch-structure` (§a-§d) +
-> `arch-enrich` (§e-§h) · anclado a `35b075a` (squash de #65 en `main`; el ancla anterior `7bf1da7` no era ancestro de `main`), `Rakefile`, `bug_bunny.gemspec`,
+> `arch-enrich` (§e-§h) · anclado a `67cca83` (squash de #71 en `main`; antes `35b075a`, y antes `7bf1da7`, que no era ancestro de `main`), `Rakefile`, `bug_bunny.gemspec`,
 > `spec/spec_helper.rb`, `spec/support/integration_helper.rb`,
 > `.github/workflows/main.yml`, `CHANGELOG.md` · fecha 2026-07-22 · cobertura:
 > §a-§d (estructura) + §e-§h (enrich, anclado a specs/CHANGELOG) completas.
 > Incremento 2026-09-28 (#64): conteos, `drain_*_spec` y el gap de aislamiento.
 > Incremento 2026-10-16 (#70): `spec/rails/` (Railtie con Rails de verdad), tarea
-> `spec:rails` y conteos; **re-anclar al SHA del squash al mergear**; escrito por el agente, sin
+> `spec:rails` y conteos; re-anclado a `67cca83` en el release 5.3.0. Escrito por el agente, sin
 > verificación humana todavía.
 
 ## 1. Resumen

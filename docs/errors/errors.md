@@ -5,7 +5,9 @@
 > `remote_error.rb`, `middleware/raise_error.rb`, `controller.rb`, `consumer.rb`,
 > `observability.rb` · fecha 2026-07-31 · cobertura: §a/§b/§d completas
 > (estructura); §c política completa (enrich, **inferida** de HTTP/AMQP —
-> verificación humana pendiente).
+> verificación humana pendiente). Incremento 2026-10-16 (#70): las citas de `configuration.rb`
+> (`:293,300,308`, los `raise` de `ConfigurationError`) son del árbol de `67cca83`; el resto sigue
+> anclado a `5697541`.
 
 ## 1. Resumen
 

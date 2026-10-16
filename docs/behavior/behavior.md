@@ -1,6 +1,6 @@
 # Comportamiento — bug_bunny
 
-> meta: artefacto `comportamiento` · RFC-007 (cadencia incremental default / completo on-demand) · generado dev-enrich 1.3.0 (backfill on-demand) · anclado a `35b075a` (squash de #65 en `main`) · cobertura: completa (8 flujos) · verificado por humano 2026-05-18 (base) · 2026-05-26 (refresco scoped: contrato de error wrapping post-#49) — incremento 2026-09-28 (#64, flujo `drain` + re-mapeo de `file:line`): escrito por el agente, **sin verificación humana todavía** — incremento 2026-10-16 (#70, flujo «Executor de Rails alrededor de cada mensaje»; sus citas son del árbol de ese PR: **re-anclar al SHA del squash al mergear**): escrito por el agente, **sin verificación humana todavía**
+> meta: artefacto `comportamiento` · RFC-007 (cadencia incremental default / completo on-demand) · generado dev-enrich 1.3.0 (backfill on-demand) · anclado a `67cca83` (squash de #71 en `main`; antes `35b075a`) · cobertura: completa (8 flujos) · verificado por humano 2026-05-18 (base) · 2026-05-26 (refresco scoped: contrato de error wrapping post-#49) — incremento 2026-09-28 (#64, flujo `drain` + re-mapeo de `file:line`): escrito por el agente, **sin verificación humana todavía** — incremento 2026-10-16 (#70, flujo «Executor de Rails alrededor de cada mensaje»; re-anclado a `67cca83` en el release 5.3.0): escrito por el agente, **sin verificación humana todavía**
 
 ## 1. Resumen
 
@@ -19,7 +19,7 @@ Flujos de ejecución de la gema. Generado en **modo completo on-demand** (RFC-00
 | Client middleware stack (onion) | **documentado** | `middleware/stack.rb:43-47`, `base.rb:35-43` |
 | Executor de Rails alrededor de cada mensaje | **documentado** | `railtie.rb:44-51`, `consumer_middleware/rails_executor.rb:28-30`, `consumer.rb:227-238` |
 
-Cobertura completa a `35b075a`. Acreta incremental en cada PR que toque un flujo (default RFC-007). Ausencia futura ≠ inexistencia.
+Cobertura completa a `67cca83`. Acreta incremental en cada PR que toque un flujo (default RFC-007). Ausencia futura ≠ inexistencia.
 
 ## 2. Cuerpo
 

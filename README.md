@@ -498,16 +498,16 @@ end
 
 Artefactos de detalle (modelo `dev-*`, RFC-001). El README indexa; no duplica.
 
-Anclado a `v5.2.0`.
+Anclado a `v5.3.0`.
 
 | Capa | Artefacto | Estado |
 |---|---|---|
 | Glosario | [docs/glossary/glossary.md](docs/glossary/glossary.md) | parcial, acreta por PR |
-| Comportamiento | [docs/behavior/behavior.md](docs/behavior/behavior.md) | completa — 6 flujos (backfill on-demand) |
+| Comportamiento | [docs/behavior/behavior.md](docs/behavior/behavior.md) | completa — 8 flujos (backfill on-demand) |
 | Configuración | [docs/config/configuracion.md](docs/config/configuracion.md) | §a-§e/§i estructura + §f/§g/§h enrich — completa |
 | Dependencias consumidas | [docs/consumed/rabbitmq.md](docs/consumed/rabbitmq.md) | §a/§b/§d estructura + §c/§e enrich |
 | Errores | [docs/errors/errors.md](docs/errors/errors.md) | §a/§b/§d completas; §c política inferida (verificación humana pendiente) |
-| Test | [docs/test/testing.md](docs/test/testing.md) | §a-§h — 16 unit / 7 integration |
+| Test | [docs/test/testing.md](docs/test/testing.md) | §a-§h — 18 unit / 8 integration / 1 rails (`spec/rails/`, en su propio proceso) |
 | Release | [docs/release/release.md](docs/release/release.md) | completa (régimen gema: build→publish; §e/f/g n/a) |
 | Datos | — | n/a — gema sin DB (sin schema/models) |
 | Eventos | — | n/a — la gema **es** el transporte; no declara catálogo de eventos de dominio propio |

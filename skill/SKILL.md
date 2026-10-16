@@ -19,9 +19,11 @@ Gema Ruby: capa de routing RESTful sobre AMQP/RabbitMQ. Microservicios se comuni
 
 ## Contrato resumido (piso mínimo)
 
-> Resume el contrato de **`bug_bunny` 5.2.0** (anclado a `v5.2.0`). Suficiente para el uso típico sin abrir el detalle; el detalle version-locked está en el **Índice de artefactos** de abajo. Antipatrones/API completa: más abajo (embebido interim, ver Cobertura y fronteras).
+> Resume el contrato de **`bug_bunny` 5.3.0** (anclado a `v5.3.0`). Suficiente para el uso típico sin abrir el detalle; el detalle version-locked está en el **Índice de artefactos** de abajo. Antipatrones/API completa: más abajo (embebido interim, ver Cobertura y fronteras).
 >
 > **Si venís de 5.1.x, un cambio de conducta (5.2.0):** una entrega cuyo middleware —o `handle_fatal_error`— levanta **antes del ack** ahora se **rechaza sin requeue** (evento `consumer.delivery_failed`), en `subscribe` y en `drain`. Antes quedaba sin ack ni reject y trababa el consumidor. Si un middleware levantaba a propósito para que el mensaje se reintentara, ahora el mensaje se pierde: el reintento es tuyo. Detalle en [`docs/behavior/behavior.md`](../docs/behavior/behavior.md).
+>
+> **Si venís de 5.2.x, dos cambios de conducta dentro de Rails (5.3.0):** cada mensaje del Consumer corre dentro de `Rails.application.executor.wrap`. En Rails ≥ 7.0, un error que escapa del mensaje además se reporta a `Rails.error` (el mensaje se sigue rechazando sin requeue), y la caché de queries de ActiveRecord queda prendida durante cada mensaje. Se apagan con `config.consumer_rails_executor = false`. Detalle en [`docs/behavior/behavior.md`](../docs/behavior/behavior.md) y [`docs/config/configuracion.md`](../docs/config/configuracion.md).
 >
 > **Si venís de 4.x, dos breaking a mirar antes de subir:** `5.0.0` eliminó la constante pública `BugBunny::SecurityError` (un `rescue BugBunny::SecurityError` que sobreviva revienta con `NameError` y **enmascara la excepción original**) y `4.18.0` cambió el wrapping `Bunny::Exception` → `CommunicationError`. Detalle en `CHANGELOG.md`.
 
@@ -63,16 +65,16 @@ client.publish('events', body: { type: 'x' })   # => { 'status' => 202 }
 
 ## Índice de artefactos (fuente de verdad)
 
-El detalle vive en `docs/<capa>/` (modelo `dev-*`); esta skill **indexa y resume**, no duplica. Links relativos = version-locked (mismo tag del release, `v5.2.0`; `gemspec.files` incluye `docs/**`, así que estos archivos viajan dentro del `.gem` que ya tenés instalado).
+El detalle vive en `docs/<capa>/` (modelo `dev-*`); esta skill **indexa y resume**, no duplica. Links relativos = version-locked (mismo tag del release, `v5.3.0`; `gemspec.files` incluye `docs/**`, así que estos archivos viajan dentro del `.gem` que ya tenés instalado).
 
 | Capa | Artefacto | Estado |
 |---|---|---|
 | Glosario de dominio | [docs/glossary/glossary.md](../docs/glossary/glossary.md) | parcial, acreta por PR |
-| Comportamiento (flujos) | [docs/behavior/behavior.md](../docs/behavior/behavior.md) | completa — 6 flujos |
+| Comportamiento (flujos) | [docs/behavior/behavior.md](../docs/behavior/behavior.md) | completa — 8 flujos |
 | Configuración | [docs/config/configuracion.md](../docs/config/configuracion.md) | §a-§e/§i estructura + §f/§g/§h enrich — completa |
 | Dependencias consumidas | [docs/consumed/rabbitmq.md](../docs/consumed/rabbitmq.md) | §a/§b/§d estructura + §c/§e enrich |
 | Errores | [docs/errors/errors.md](../docs/errors/errors.md) | §a/§b/§d completas; §c política inferida (verificación humana pendiente) |
-| Test | [docs/test/testing.md](../docs/test/testing.md) | §a-§h — 16 unit / 7 integration |
+| Test | [docs/test/testing.md](../docs/test/testing.md) | §a-§h — 18 unit / 8 integration / 1 rails (`spec/rails/`, en su propio proceso) |
 | Release | [docs/release/release.md](../docs/release/release.md) | completa (régimen gema: build→publish; §e/f/g n/a) |
 | Datos | — | n/a — gema sin DB |
 | Eventos | — | n/a — la gema **es** el transporte; no declara catálogo de eventos de dominio propio |
