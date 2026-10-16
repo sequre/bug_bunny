@@ -11,8 +11,9 @@
 > citas `file:line` re-mapeadas al árbol de `35b075a` (el refactor de #64 las corrió).
 > Incremento 2026-10-16 (#70): `consumer_rails_executor` (`configuration.rb:196,277`,
 > `railtie.rb:44-49`); las citas de `configuration.rb` re-mapeadas por contenido (el atributo
-> nuevo corrió +10/+11 todo lo que viene después); escrito por el agente, sin verificación
-> humana todavía.
+> nuevo corrió +10/+11 todo lo que viene después) y las de `railtie.rb` (§i); las citas son del
+> árbol de este PR: **re-anclar al SHA del squash al mergear**. Escrito por el agente, sin
+> verificación humana todavía.
 
 ## 1. Resumen
 
@@ -26,12 +27,12 @@ en `lib/`**; el `ENV.fetch` vive en el **template** que sugiere al consumidor
 
 ### a. Hecho verificable
 
-- **Total opciones (`Configuration`):** 32 (31 `attr_accessor` + 1 `attr_reader`; medido
-  2026-09-28 — el `29` anterior ya estaba desfasado del código antes de #64).
+- **Total opciones (`Configuration`):** 33 (32 `attr_accessor` + 1 `attr_reader`; medido
+  2026-10-16, con `consumer_rails_executor` de #70 — el `29` anterior ya estaba desfasado del código antes de #64).
 - **Validadas requeridas (`VALIDATIONS`, `configuration.rb:25-39`):** 5 (`host`,
   `port`, `username`, `password`, `vhost` — `required: true`; igual tienen
   default, `validate!` exige no-vacío).
-- **Con default:** 32 (todas; defaults en `initialize`/`init_callback_defaults`/`init_drain_defaults`).
+- **Con default:** 33 (todas; defaults en `initialize`/`init_callback_defaults`/`init_drain_defaults`).
 - **Con rango validado:** 9 (`port`, `heartbeat`, `connection_timeout`,
   `read_timeout`, `write_timeout`, `rpc_timeout`, `channel_prefetch`,
   `drain_idle_timeout`, `drain_poll_interval`).
@@ -111,11 +112,12 @@ El install template (`initializer.rb`) **sugiere al consumidor** wirear 4 ENV
 
 | inyección | qué hace | ancla |
 |---|---|---|
-| `initializer 'bug_bunny.add_autoload_paths'` | registra `app/rabbit` en el autoloader (Zeitwerk, `eager_load: true`) si existe | `:15-18` |
-| `config.after_initialize` → `ForkTracker.after_fork` | cierra la conexión heredada en cada fork (Rails 7.1+) | `:24-26` |
-| `config.after_initialize` → `Puma.events.on_worker_boot` | mismo cierre, hook legacy Puma <5 | `:30-34` |
-| `rake_tasks` | carga `tasks/bug_bunny.rake` (`bug_bunny:sync`) | `:38-40` |
-| `Spring.after_fork` | cierra conexión en preloader Spring | `:43-47` |
+| `initializer 'bug_bunny.add_autoload_paths'` | registra `app/rabbit` en el autoloader (Zeitwerk, `eager_load: true`) si existe | `:16-19` |
+| `config.after_initialize` → `ForkTracker.after_fork` | cierra la conexión heredada en cada fork (Rails 7.1+) | `:25-27` |
+| `config.after_initialize` → `Puma.events.on_worker_boot` | mismo cierre, hook legacy Puma <5 | `:31-35` |
+| `config.after_initialize` → `consumer_middlewares.prepend(RailsExecutor)` | si `consumer_rails_executor` (default `true`), pone `ConsumerMiddleware::RailsExecutor` **primero** en la cadena del Consumer: cada mensaje corre dentro de `Rails.application.executor.wrap` (#70) | `:44-49` |
+| `rake_tasks` | carga `tasks/bug_bunny.rake` (`bug_bunny:sync`) | `:52-54` |
+| `Spring.after_fork` | cierra conexión en preloader Spring | `:57-61` |
 
 ### f. Enriquecimiento semántico
 

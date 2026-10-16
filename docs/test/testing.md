@@ -7,7 +7,8 @@
 > §a-§d (estructura) + §e-§h (enrich, anclado a specs/CHANGELOG) completas.
 > Incremento 2026-09-28 (#64): conteos, `drain_*_spec` y el gap de aislamiento.
 > Incremento 2026-10-16 (#70): `spec/rails/` (Railtie con Rails de verdad), tarea
-> `spec:rails` y conteos; escrito por el agente, sin verificación humana todavía.
+> `spec:rails` y conteos; **re-anclar al SHA del squash al mergear**; escrito por el agente, sin
+> verificación humana todavía.
 
 ## 1. Resumen
 

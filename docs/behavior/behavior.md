@@ -1,6 +1,6 @@
 # Comportamiento — bug_bunny
 
-> meta: artefacto `comportamiento` · RFC-007 (cadencia incremental default / completo on-demand) · generado dev-enrich 1.3.0 (backfill on-demand) · anclado a `35b075a` (squash de #65 en `main`) · cobertura: completa (7 flujos) · verificado por humano 2026-05-18 (base) · 2026-05-26 (refresco scoped: contrato de error wrapping post-#49) — incremento 2026-09-28 (#64, flujo `drain` + re-mapeo de `file:line`): escrito por el agente, **sin verificación humana todavía** — incremento 2026-10-16 (#70, flujo «Executor de Rails alrededor de cada mensaje»): escrito por el agente, **sin verificación humana todavía**
+> meta: artefacto `comportamiento` · RFC-007 (cadencia incremental default / completo on-demand) · generado dev-enrich 1.3.0 (backfill on-demand) · anclado a `35b075a` (squash de #65 en `main`) · cobertura: completa (8 flujos) · verificado por humano 2026-05-18 (base) · 2026-05-26 (refresco scoped: contrato de error wrapping post-#49) — incremento 2026-09-28 (#64, flujo `drain` + re-mapeo de `file:line`): escrito por el agente, **sin verificación humana todavía** — incremento 2026-10-16 (#70, flujo «Executor de Rails alrededor de cada mensaje»; sus citas son del árbol de ese PR: **re-anclar al SHA del squash al mergear**): escrito por el agente, **sin verificación humana todavía**
 
 ## 1. Resumen
 
