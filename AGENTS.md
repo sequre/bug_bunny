@@ -38,6 +38,7 @@ a YARD/specs/CHANGELOG. Pendiente de **verificación humana** (inferencias):
 
 - Ruby: `.ruby-version` · gemas: `Gemfile.lock` · manager: chruby + Bundler.
 - Antes de commitear: `bundle exec rubocop -a` (base `rubocop-rails-omakase`),
-  `bundle exec rspec`, YARD incremental (`bundle exec yard stats --list-undoc`).
+  `bundle exec rake` (las dos suites: `spec/` y `spec/rails/`, cada una en su proceso; `bundle exec rspec` solo
+  corre `spec/`, sin Rails), YARD incremental (`bundle exec yard stats --list-undoc`).
 - Releases: `/gem-release` (el GitHub Action publica a RubyGems al pushear tag `v*`).
 - Doc por-PR: si tocás una capa, mové su artefacto en el mismo PR (régimen RFC-001).

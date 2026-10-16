@@ -17,7 +17,7 @@ Flujos de ejecución de la gema. Generado en **modo completo on-demand** (RFC-00
 | Consumer drain (drenar y salir) | **documentado** | `consumer.rb:158-176,271-290`, `drain_tracker.rb:28-47` |
 | Error handling / RemoteError | **documentado** | `consumer.rb:473-482`, `remote_error.rb`, `raise_error.rb:32-65` |
 | Client middleware stack (onion) | **documentado** | `middleware/stack.rb:43-47`, `base.rb:35-43` |
-| Executor de Rails alrededor de cada mensaje | **documentado** | `railtie.rb:44-49`, `consumer_middleware/rails_executor.rb:26-28`, `consumer.rb:227-238` |
+| Executor de Rails alrededor de cada mensaje | **documentado** | `railtie.rb:44-51`, `consumer_middleware/rails_executor.rb:28-30`, `consumer.rb:227-238` |
 
 Cobertura completa a `35b075a`. Acreta incremental en cada PR que toque un flujo (default RFC-007). Ausencia futura ≠ inexistencia.
 
@@ -159,14 +159,14 @@ sequenceDiagram
     participant P as process_message
     BR->>C: deliver (hilo de Bunny)
     C->>X: consumer_middlewares.call
-    X->>X: executor.wrap — al entrar: reset de CurrentAttributes
+    X->>X: executor.wrap — al entrar: reset de CurrentAttributes · prende la caché de queries de AR
     X->>M: @app.call
     M->>P: core: rutea, llama al controller, ack/reject, reply RPC
     P-->>X: vuelve
-    X->>X: al salir: reset de CurrentAttributes · la conexión de AR vuelve al pool · se limpia la caché de queries
-    Note over C: un error que escapa: wrap lo relanza (en Rails ≥ 7.1, antes lo reporta a Rails.error) → rescue de handle_delivery → reject sin requeue
+    X->>X: al salir: reset de CurrentAttributes · la conexión de AR vuelve al pool · se apaga y limpia la caché de queries
+    Note over C: un error que escapa: wrap lo relanza (en Rails ≥ 7.0, antes lo reporta a Rails.error) → rescue de handle_delivery → reject sin requeue
 ```
-Contexto: `railtie.rb:44-49` (registro en `after_initialize`, sólo si `config.consumer_rails_executor`), `consumer_middleware.rb:72-75` (`Stack#prepend`), `consumer_middleware/rails_executor.rb:26-28` (`wrap`), `consumer.rb:227-238` (`handle_delivery`: la cadena y su `rescue`). **Va primero** (`prepend`) porque el reset al entrar borraría el estado que un middleware anterior ya cargó: el de tracing de ExisRay carga `ExisRay::Tracer` (un `CurrentAttributes`) y se registra en su propio `after_initialize`, en un orden que no controlamos. El ack/reject queda adentro del wrap (vive en `process_message`); el `rescue` de `handle_delivery`, afuera. Si el hilo ya está dentro del executor, `wrap` no abre otro. **Fuera de Rails** el Railtie no se carga y la cadena no cambia. Probado con Rails de verdad en `spec/rails/consumer_rails_executor_spec.rb` (Rails 8.1).
+Contexto: `railtie.rb:44-51` (registro en `after_initialize`, sólo si `config.consumer_rails_executor`), `consumer_middleware.rb:72-75` (`Stack#prepend`), `consumer_middleware/rails_executor.rb:28-30` (`wrap`), `consumer.rb:227-238` (`handle_delivery`: la cadena y su `rescue`). **Va primero** (`prepend`) porque el reset al entrar borraría el estado que un middleware anterior ya cargó: el de tracing de ExisRay carga `ExisRay::Tracer` (un `CurrentAttributes`) y se registra en su propio `after_initialize`, en un orden que no controlamos. El ack/reject queda adentro del wrap (vive en `process_message`); el `rescue` de `handle_delivery`, afuera. Si el hilo ya está dentro del executor, `wrap` no abre otro. **Fuera de Rails** el Railtie no se carga y la cadena no cambia. Probado con Rails de verdad en `spec/rails/consumer_rails_executor_spec.rb` (Rails 8.1.4; la revisión del PR lo midió también en 7.0.10 y 7.1.6). **Cambio de conducta:** la caché de queries, que en el hilo de Bunny estaba apagada, queda prendida durante cada mensaje (`ActiveRecord::QueryCache::ExecutorHooks`).
 
 ### Flujo: Error handling / RemoteError
 Excepción no manejada en controller → serializada (clase/mensaje/backtrace[0..25]) → reply 500 → reconstruida client-side por `Middleware::RaiseError`.

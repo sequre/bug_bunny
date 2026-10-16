@@ -125,7 +125,7 @@ RSpec.describe 'BugBunny::ConsumerMiddleware::RailsExecutor' do
     end
 
     before { Rails.error.subscribe(subscriber) }
-    after { Rails.error.unsubscribe(subscriber) }
+    after { Rails.error.unsubscribe(subscriber) if Rails.error.respond_to?(:unsubscribe) } # no existe en Rails 7.0
 
     it 'termina en un reject sin requeue, como hoy, y además se reporta a Rails.error' do
       allow(consumer).to receive(:process_message).and_raise(RuntimeError, 'boom')
@@ -139,21 +139,27 @@ RSpec.describe 'BugBunny::ConsumerMiddleware::RailsExecutor' do
 
   describe 'config.consumer_rails_executor' do
     # Rails se inicializa una vez por proceso: la app se bootea de nuevo en un subproceso.
-    def middlewares_after_boot(executor)
+    # Las líneas de stdout que nombran un middleware: un warning del entorno no las rompe.
+    def middlewares_after_boot(env)
       app = File.expand_path('app.rb', __dir__)
-      output, status = Open3.capture2e({ 'BUG_BUNNY_SPEC_EXECUTOR' => executor }, RbConfig.ruby, app)
-      raise "la app no booteó:\n#{output}" unless status.success?
+      stdout, stderr, status = Open3.capture3(env, RbConfig.ruby, app)
+      raise "la app no booteó:\n#{stderr}" unless status.success?
 
-      output.split("\n")
+      stdout.lines.map(&:strip).grep(/\ABugBunny/)
     end
 
     it 'con false, no registra el middleware' do
-      expect(middlewares_after_boot('off')).to eq(['BugBunnyRailsSpec::TracingMiddleware'])
+      expect(middlewares_after_boot('BUG_BUNNY_SPEC_EXECUTOR' => 'off')).to eq(['BugBunnyRailsSpec::TracingMiddleware'])
     end
 
-    it 'por default, lo registra primero' do
-      expect(middlewares_after_boot('on'))
+    it 'con true, lo registra primero' do
+      expect(middlewares_after_boot('BUG_BUNNY_SPEC_EXECUTOR' => 'on'))
         .to eq(%w[BugBunny::ConsumerMiddleware::RailsExecutor BugBunnyRailsSpec::TracingMiddleware])
+    end
+
+    it 'sin BugBunny.configure previo, bootea y lo registra: la opción ausente vale su default' do
+      expect(middlewares_after_boot('BUG_BUNNY_SPEC_CONFIGURE' => 'none'))
+        .to eq(['BugBunny::ConsumerMiddleware::RailsExecutor'])
     end
   end
 end

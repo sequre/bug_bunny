@@ -1,0 +1,1 @@
+--exclude-pattern spec/rails/**/*_spec.rb

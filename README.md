@@ -376,19 +376,23 @@ Bunny's worker thread, which Rails does not know about; without the executor, wh
 one message to the next:
 
 - `ActiveSupport::CurrentAttributes` (and whatever lives in them: Sentry tags, trace context, per-run metrics);
-- the ActiveRecord connection, which the thread keeps until it dies instead of returning it to the pool;
-- the query cache.
+- the ActiveRecord connection, which the thread keeps until it dies instead of returning it to the pool.
 
 It goes first (`prepend`, not `use`) so that it also wraps the middlewares that load per-thread state, like ExisRay's
 tracing middleware. Outside Rails nothing is registered and the consumer behaves as before.
 
-#### ⚠️ Behavior change — errors that escape a message
+#### ⚠️ Behavior change
 
+**Errors that escape a message (Rails ≥ 7.0).** 
 An error that escapes the processing of a message (from a middleware, or from `handle_fatal_error`) still ends the same
-way: the delivery is rejected without requeue. **On Rails ≥ 7.1, it is now also reported to `Rails.error`** with
-`handled: false`, because that is what `executor.wrap` does before re-raising. If you have a `Rails.error` subscriber
+way: the delivery is rejected without requeue. **It is now also reported to `Rails.error`** with `handled: false`, because that is what `executor.wrap` does before re-raising. If you have a `Rails.error` subscriber
 (e.g. Sentry's), that error shows up there. Errors inside your controller actions are rescued by the consumer as
 before and are not affected.
+
+**The ActiveRecord query cache is on during each message**, and cleared when it ends: that is what the executor does
+(`ActiveRecord::QueryCache::ExecutorHooks`). On Bunny's thread it used to be off. A handler that re-reads the same row
+within one message, waiting for another process to change it (a poll), now gets the cached value; wrap that read in
+`ActiveRecord::Base.uncached { … }`.
 
 To turn it off (for example, if your consumer already wraps each message itself):
 

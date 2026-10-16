@@ -93,8 +93,8 @@ BugBunny.configuration.consumer_middlewares.use MyAuth::Middleware
 
 En Rails, el Railtie registra `BugBunny::ConsumerMiddleware::RailsExecutor` **primero**: cada mensaje corre dentro
 de `Rails.application.executor.wrap`, así que los `CurrentAttributes` no pasan de un mensaje al siguiente y la
-conexión de ActiveRecord vuelve al pool. En Rails ≥ 7.1, un error que escapa del mensaje además se reporta a
-`Rails.error`. Se apaga con `config.consumer_rails_executor = false` (desde `config/initializers`).
+conexión de ActiveRecord vuelve al pool. Cambios de conducta: en Rails ≥ 7.0, un error que escapa del mensaje además
+se reporta a `Rails.error`, y la caché de queries de AR queda prendida durante cada mensaje. Se apaga con `config.consumer_rails_executor = false` (desde `config/initializers`).
 
 ### Crear Middleware
 

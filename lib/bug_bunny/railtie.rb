@@ -42,6 +42,8 @@ module BugBunny
     # envuelva también a los middlewares que cargan ese estado, como el de tracing de ExisRay, que
     # se registra en su propio `after_initialize` y en un orden que no controlamos.
     config.after_initialize do
+      # Sin un `BugBunny.configure` previo, vale la configuración por default; un `configure` posterior la reusa.
+      BugBunny.configuration ||= BugBunny::Configuration.new
       if BugBunny.configuration.consumer_rails_executor
         require_relative 'consumer_middleware/rails_executor'
         BugBunny.consumer_middlewares.prepend(BugBunny::ConsumerMiddleware::RailsExecutor)

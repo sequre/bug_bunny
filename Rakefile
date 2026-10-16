@@ -21,6 +21,7 @@ end
 # proceso: corren aparte, para que el resto de la suite siga probando la gema fuera de Rails.
 RSpec::Core::RakeTask.new('spec:rails') do |t|
   t.pattern = 'spec/rails/**/*_spec.rb'
+  t.exclude_pattern = '' # anula el `--exclude-pattern` de `.rspec`, que saca `spec/rails` del `rspec` pelado
 end
 
 # Mantiene la tarea :test apuntando a los tests de integración legacy de Minitest
@@ -32,4 +33,5 @@ Rake::TestTask.new(:test) do |t|
   t.warning    = false
 end
 
-task default: :spec
+# Las dos suites, cada una en su proceso: es lo que corren `quality-code` y `gem-release`.
+task default: [:spec, 'spec:rails']

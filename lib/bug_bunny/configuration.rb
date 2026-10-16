@@ -188,7 +188,7 @@ module BugBunny
     # @return [Boolean] Si `true` (default) y la gema corre dentro de Rails, el Railtie envuelve
     #   cada mensaje del Consumer con `Rails.application.executor.wrap`
     #   ({BugBunny::ConsumerMiddleware::RailsExecutor}): el estado por hilo (`CurrentAttributes`,
-    #   la conexión de ActiveRecord, la caché de queries) no pasa de un mensaje al siguiente.
+    #   la conexión de ActiveRecord) no pasa de un mensaje al siguiente.
     #   Fuera de Rails no tiene efecto.
     #
     #   Se lee al terminar de inicializar la app, así que se apaga desde `config/initializers`.

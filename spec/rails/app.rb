@@ -9,6 +9,8 @@
 # y lee la cadena de middlewares que imprime.
 #
 # `BUG_BUNNY_SPEC_EXECUTOR=off` bootea con `config.consumer_rails_executor = false`.
+# `BUG_BUNNY_SPEC_CONFIGURE=none` bootea sin llamar a `BugBunny.configure` ni registrar otros middlewares:
+# la configuración queda la de default.
 
 ENV['RAILS_ENV'] = 'test'
 ENV['DATABASE_URL'] = 'sqlite3::memory:'
@@ -51,15 +53,17 @@ module BugBunnyRailsSpec
   end
 end
 
-BugBunny.configure do |config|
-  config.logger = Logger.new(nil)
-  # El `respond_to?` deja correr estos specs contra una versión de la gema sin la opción, para ver
-  # que fallan sin el cambio.
-  if config.respond_to?(:consumer_rails_executor=)
-    config.consumer_rails_executor = ENV['BUG_BUNNY_SPEC_EXECUTOR'] != 'off'
+unless ENV['BUG_BUNNY_SPEC_CONFIGURE'] == 'none'
+  BugBunny.configure do |config|
+    config.logger = Logger.new(nil)
+    # El `respond_to?` deja correr estos specs contra una versión de la gema sin la opción, para ver
+    # que fallan sin el cambio.
+    if config.respond_to?(:consumer_rails_executor=)
+      config.consumer_rails_executor = ENV['BUG_BUNNY_SPEC_EXECUTOR'] != 'off'
+    end
   end
+  BugBunny.consumer_middlewares.use(BugBunnyRailsSpec::TracingMiddleware)
 end
-BugBunny.consumer_middlewares.use(BugBunnyRailsSpec::TracingMiddleware)
 
 BugBunnyRailsSpec::Application.initialize!
 

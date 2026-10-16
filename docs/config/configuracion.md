@@ -10,7 +10,7 @@
 > anclados a `configuration.rb:37-38,99-105,273-275` y `consumer.rb:271-290`; todas las
 > citas `file:line` re-mapeadas al árbol de `35b075a` (el refactor de #64 las corrió).
 > Incremento 2026-10-16 (#70): `consumer_rails_executor` (`configuration.rb:196,277`,
-> `railtie.rb:44-49`); las citas de `configuration.rb` re-mapeadas por contenido (el atributo
+> `railtie.rb:44-51`); las citas de `configuration.rb` re-mapeadas por contenido (el atributo
 > nuevo corrió +10/+11 todo lo que viene después) y las de `railtie.rb` (§i); las citas son del
 > árbol de este PR: **re-anclar al SHA del squash al mergear**. Escrito por el agente, sin
 > verificación humana todavía.
@@ -115,9 +115,9 @@ El install template (`initializer.rb`) **sugiere al consumidor** wirear 4 ENV
 | `initializer 'bug_bunny.add_autoload_paths'` | registra `app/rabbit` en el autoloader (Zeitwerk, `eager_load: true`) si existe | `:16-19` |
 | `config.after_initialize` → `ForkTracker.after_fork` | cierra la conexión heredada en cada fork (Rails 7.1+) | `:25-27` |
 | `config.after_initialize` → `Puma.events.on_worker_boot` | mismo cierre, hook legacy Puma <5 | `:31-35` |
-| `config.after_initialize` → `consumer_middlewares.prepend(RailsExecutor)` | si `consumer_rails_executor` (default `true`), pone `ConsumerMiddleware::RailsExecutor` **primero** en la cadena del Consumer: cada mensaje corre dentro de `Rails.application.executor.wrap` (#70) | `:44-49` |
-| `rake_tasks` | carga `tasks/bug_bunny.rake` (`bug_bunny:sync`) | `:52-54` |
-| `Spring.after_fork` | cierra conexión en preloader Spring | `:57-61` |
+| `config.after_initialize` → `consumer_middlewares.prepend(RailsExecutor)` | si `consumer_rails_executor` (default `true`), pone `ConsumerMiddleware::RailsExecutor` **primero** en la cadena del Consumer: cada mensaje corre dentro de `Rails.application.executor.wrap` (#70) | `:44-51` |
+| `rake_tasks` | carga `tasks/bug_bunny.rake` (`bug_bunny:sync`) | `:54-56` |
+| `Spring.after_fork` | cierra conexión en preloader Spring | `:59-63` |
 
 ### f. Enriquecimiento semántico
 
@@ -135,7 +135,7 @@ del código.
 | Drain (`drain_idle_timeout`/`drain_poll_interval`) | latencia | `drain_idle_timeout` muy bajo → un productor lento deja mensajes para la próxima corrida (no se pierden); muy alto → el job tarda más en terminar tras vaciar la cola | ninguno: sólo acota cuánto espera `Consumer#drain` (`consumer.rb:285`) | correr un consumidor como job que termina (#64) |
 | Callbacks (`on_return`/`on_rpc_reply`/`rpc_reply_headers`) | extensibilidad | una excepción en `on_return` se captura pero **degrada visibilidad** (YARD `configuration.rb:157`) | corren en hilos sensibles (ver §h) | propagar trace-context / alertar unroutable |
 | Confirms (`nack_raise`/`return_raise`) | integridad de entrega | `false` → NACK/return solo se logea, la llamada retorna `202` (modo legacy, posible pérdida silenciosa) | habilitan el raise de `PublishNacked`/`PublishUnroutable` | elegir entre fail-fast vs best-effort en publish confirmado |
-| Executor de Rails (`consumer_rails_executor`) | aislamiento entre mensajes | `false` dentro de Rails → el estado por hilo (`CurrentAttributes`, conexión de ActiveRecord, caché de queries) pasa de un mensaje al siguiente, salvo que el consumidor envuelva cada mensaje por su cuenta; fuera de Rails no tiene efecto | `true` → el Railtie registra `ConsumerMiddleware::RailsExecutor` **primero** en la cadena (`railtie.rb:44-49`); en Rails ≥ 7.1, un error que escapa del mensaje además se reporta a `Rails.error` (`handled: false`) | que cada mensaje empiece limpio, como un job de Sidekiq (#70) |
+| Executor de Rails (`consumer_rails_executor`) | aislamiento entre mensajes | `false` dentro de Rails → el estado por hilo (`CurrentAttributes`, conexión de ActiveRecord) pasa de un mensaje al siguiente, salvo que el consumidor envuelva cada mensaje por su cuenta; fuera de Rails no tiene efecto | `true` → el Railtie registra `ConsumerMiddleware::RailsExecutor` **primero** en la cadena (`railtie.rb:44-51`); en Rails ≥ 7.0, un error que escapa del mensaje además se reporta a `Rails.error` (`handled: false`), y la caché de queries de AR queda prendida durante cada mensaje | que cada mensaje empiece limpio, como un job de Sidekiq (#70) |
 | Routing (`controller_namespace`) | seguridad | clase resuelta no subclase de `BugBunny::Controller` → el worker responde **403** + reject (guard anti-RCE, `consumer.rb:375-381`) | acota qué clases son enrutables | superficie de control de RCE |
 | Logging (`logger`/`bunny_logger`/`log_tags`) | observabilidad | — | salida a `$stdout` por default | trazabilidad estructurada |
 | Infra (`exchange_options`/`queue_options`) | infraestructura | options incompatibles con el broker → `PreconditionFailed` (vía `CommunicationError`) | defaults globales mergeados por recurso | declaración AMQP por default |
