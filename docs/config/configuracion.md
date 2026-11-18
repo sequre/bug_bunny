@@ -13,7 +13,10 @@
 > `railtie.rb:44-51`); las citas de `configuration.rb` re-mapeadas por contenido (el atributo
 > nuevo corrió +10/+11 todo lo que viene después) y las de `railtie.rb` (§i). Re-anclado a
 > `67cca83` en el release 5.3.0: entre `35b075a` y `67cca83` sólo cambiaron los archivos de #70
-> (re-mapeados) y `version.rb` (no citado). Escrito por el agente, sin verificación humana todavía.
+> (re-mapeados) y `version.rb` (no citado).
+> Incremento 2026-11-18 (#72): se sacó la inyección `rake_tasks` (`bug_bunny:sync`) del §i; la
+> cita de `Spring.after_fork` pasó de `:59-63` a `:54-58`. Escrito por el agente, sin verificación
+> humana todavía.
 
 ## 1. Resumen
 
@@ -116,8 +119,7 @@ El install template (`initializer.rb`) **sugiere al consumidor** wirear 4 ENV
 | `config.after_initialize` → `ForkTracker.after_fork` | cierra la conexión heredada en cada fork (Rails 7.1+) | `:25-27` |
 | `config.after_initialize` → `Puma.events.on_worker_boot` | mismo cierre, hook legacy Puma <5 | `:31-35` |
 | `config.after_initialize` → `consumer_middlewares.prepend(RailsExecutor)` | si `consumer_rails_executor` (default `true`), pone `ConsumerMiddleware::RailsExecutor` **primero** en la cadena del Consumer: cada mensaje corre dentro de `Rails.application.executor.wrap` (#70) | `:44-51` |
-| `rake_tasks` | carga `tasks/bug_bunny.rake` (`bug_bunny:sync`) | `:54-56` |
-| `Spring.after_fork` | cierra conexión en preloader Spring | `:59-63` |
+| `Spring.after_fork` | cierra conexión en preloader Spring | `:54-58` |
 
 ### f. Enriquecimiento semántico
 

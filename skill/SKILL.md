@@ -371,7 +371,7 @@ client.publish('foo', confirmed: true, mandatory: true, return_raise: false, bod
 ## FAQ
 
 ### ¿Cómo se integra con Rails?
-`rails generate bug_bunny:install` genera el inicializador, crea `app/bug_bunny/controllers/` y actualiza `CLAUDE.md`. El pool se define en el inicializador y se asigna a `BugBunny::Resource.connection_pool`.
+`rails generate bug_bunny:install` genera el inicializador y crea `app/bug_bunny/controllers/`. El pool se define en el inicializador y se asigna a `BugBunny::Resource.connection_pool`.
 
 ### ¿Cómo funciona el Health Check?
 El consumer ejecuta un check periódico (default 60s) que verifica la conexión AMQP con un `queue.declare(passive: true)`. Si `health_check_file` está configurado, actualiza su mtime. En Kubernetes, usar un `livenessProbe` tipo `exec` que verifique recencia del archivo.
