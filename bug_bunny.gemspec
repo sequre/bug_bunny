@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
 
   spec.homepage = "https://github.com/gedera/bug_bunny"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 2.7.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/gedera/bug_bunny"
@@ -37,10 +37,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "connection_pool", ">= 2.4"
   spec.add_dependency "concurrent-ruby", "~> 1.3"
 
-  # Mantenemos >= para compatibilidad amplia con Rails, aunque RubyGems avise.
-  # Si quieres ser estricto usa "~> 7.0"
-  spec.add_dependency "activemodel", ">= 6.1"
-  spec.add_dependency "activesupport", ">= 6.1"
+  # Floor is Rails 7.0: BugBunny::Resource includes ActiveModel::API, which does not exist in 6.1. With 6.1
+  # Bundler resolved and the app crashed at boot (#67). Open upper bound on purpose (the fleet runs 7.0 to 8.1).
+  spec.add_dependency "activemodel", ">= 7.0"
+  spec.add_dependency "activesupport", ">= 7.0"
   spec.add_dependency "rack", ">= 2.0"
 
   # CORRECCIÓN: Agregamos versiones mínimas o rangos para evitar warnings
@@ -58,7 +58,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest-reporters", "~> 1.6"
 
   # Specs del Railtie (spec/rails): una app Rails mínima con ActiveRecord sobre SQLite en memoria.
-  spec.add_development_dependency 'activerecord', '>= 6.1'
-  spec.add_development_dependency 'railties', '>= 6.1'
+  spec.add_development_dependency 'activerecord', '>= 7.0'
+  spec.add_development_dependency 'railties', '>= 7.0'
   spec.add_development_dependency 'sqlite3', '>= 1.4'
 end
