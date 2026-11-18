@@ -15,7 +15,7 @@
 > `67cca83` en el release 5.3.0: entre `35b075a` y `67cca83` sólo cambiaron los archivos de #70
 > (re-mapeados) y `version.rb` (no citado).
 > Incremento 2026-11-18 (#72): se sacó la inyección `rake_tasks` (`bug_bunny:sync`) del §i; la
-> cita de `Spring.after_fork` pasó de `:59-63` a `:54-58`. Escrito por el agente, sin verificación
+> cita de `Spring.after_fork` pasó de `:59-63` a `:54-58` (árbol de `336f1eb`, release 5.4.0). Escrito por el agente, sin verificación
 > humana todavía.
 
 ## 1. Resumen

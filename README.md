@@ -498,7 +498,7 @@ end
 
 Artefactos de detalle (modelo `dev-*`, RFC-001). El README indexa; no duplica.
 
-Anclado a `v5.3.0`.
+Anclado a `v5.4.0`.
 
 | Capa | Artefacto | Estado |
 |---|---|---|

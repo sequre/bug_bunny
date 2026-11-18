@@ -7,8 +7,9 @@
 > §a-§d (estructura) + §e-§h (enrich, anclado a specs/CHANGELOG) completas.
 > Incremento 2026-09-28 (#64): conteos, `drain_*_spec` y el gap de aislamiento.
 > Incremento 2026-10-16 (#70): `spec/rails/` (Railtie con Rails de verdad), tarea
-> `spec:rails` y conteos; re-anclado a `67cca83` en el release 5.3.0. Escrito por el agente, sin
-> verificación humana todavía.
+> `spec:rails` y conteos; re-anclado a `67cca83` en el release 5.3.0. Incremento 2026-11-18 (#72):
+> fila `spec/rails/` (1 → 3 archivos: generador y rake tasks del Railtie), árbol de `336f1eb`. Escrito por
+> el agente, sin verificación humana todavía.
 
 ## 1. Resumen
 
@@ -26,7 +27,7 @@ configurado.
 | framework | dir | nivel | nº | propósito |
 |---|---|---|---|---|
 | **RSpec** `~> 3.0` | `spec/unit/` | unit | 18 | client/session pool, configuration, consumer, `drain_tracker`, producer, controller, raise_error, remote_error, request, route, observability, otel, resource, middleware, `extra_top_level_params` (hook de params hermanos en `Resource#save`), `consumer_rails_executor_outside_rails` (fuera de Rails no se carga el Railtie ni el middleware del executor) |
-| **RSpec** + `railties`/`activerecord`/`sqlite3` | `spec/rails/` | integration con Rails (sin broker) | 1 | `consumer_rails_executor`: una app Rails mínima (`spec/rails/app.rb`, ActiveRecord sobre SQLite en memoria) prueba que cada mensaje corre dentro del executor — el `CurrentAttributes` no pasa al siguiente, la conexión vuelve al pool, el orden frente a un middleware de tracing, el error que escapa (reject + `Rails.error`) y `consumer_rails_executor = false` (en subproceso) |
+| **RSpec** + `railties`/`activerecord`/`sqlite3` | `spec/rails/` | integration con Rails (sin broker) | 3 | `install_generator` (el generador no crea ni modifica `CLAUDE.md`, no lo menciona y sigue creando inicializador y `app/bug_bunny/controllers/`) · `railtie_rake_tasks` (el Railtie no define `bug_bunny:sync`) · `consumer_rails_executor`: una app Rails mínima (`spec/rails/app.rb`, ActiveRecord sobre SQLite en memoria) prueba que cada mensaje corre dentro del executor — el `CurrentAttributes` no pasa al siguiente, la conexión vuelve al pool, el orden frente a un middleware de tracing, el error que escapa (reject + `Rails.error`) y `consumer_rails_executor = false` (en subproceso) |
 | **RSpec** | `spec/integration/` | integration | 8 | client, consumer_middleware, controller, drain, error_handling, infrastructure, publisher_confirms, resource — **requieren RabbitMQ real** (usan `BugBunny.create_connection` + pool) |
 | **Minitest** `~> 5.0` (+ `mocha`, `minitest-reporters`) | `test/integration/` | integration (legacy) | 2 | `manual_client_test.rb`, `infrastructure_test.rb` — tarea `:test`, **no** en default ni CI |
 

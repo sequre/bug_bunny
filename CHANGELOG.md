@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.4.0] - 2026-11-18
+
+### ⚠️ Cambio de conducta — la gema ya no escribe `CLAUDE.md`
+- **`rails generate bug_bunny:install` ya no crea ni modifica el `CLAUDE.md` del repo que usa la gema**, y **se borró la tarea `rake bug_bunny:sync`** (y su carga en el Railtie), que lo creaba o reescribía en `Dir.pwd`. Los repos del fleet no llevan configuración de agente: la trae el reino `hefesto` (sequre/hefesto#724, lector L11). Además, el bloque que escribían apuntaba a `docs/ai`, que no existe desde 4.8.1. (#72, #73) — @gedera
+- **A mirar si consumís:** quien llame `rake bug_bunny:sync` (en `bin/setup`, un Dockerfile o CI) recibe `Don't know how to build task 'bug_bunny:sync'` al actualizar: borrá esa llamada. Medido el 2026-11-18: ningún repo de `sequre` la llama. Un `CLAUDE.md` que ya tenga el bloque `### bug_bunny` queda como está; nadie lo vuelve a actualizar.
+
+### Tests
+- `spec/rails/`: el generador no crea ni modifica `CLAUDE.md` y sigue creando el inicializador y `app/bug_bunny/controllers/`; el Railtie no define `bug_bunny:sync`. Fallan contra 5.3.0. (#73) — @gedera
+
+### Documentación
+- `docs/config/configuracion.md` (§i, sin la inyección `rake_tasks`) y `skill/SKILL.md` (FAQ del generador). (#73) — @gedera
+
 ## [5.3.0] - 2026-10-16
 
 ### Nuevas funcionalidades

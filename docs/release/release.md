@@ -7,7 +7,8 @@
 > `CHANGELOG.md`) · fecha 2026-07-31 · cobertura:
 > completa (régimen gema: build→publish, §e/f/g n/a). Incremento 2026-10-16 (release 5.3.0):
 > versión actual y los pines de los consumidores (§h), re-medidos; escrito por el agente, sin
-> verificación humana todavía.
+> verificación humana todavía. Incremento 2026-11-18 (release 5.4.0): versión actual; los pines de §h
+> no se re-midieron.
 
 ## 1. Resumen
 
@@ -23,9 +24,9 @@ out-of-repo).
 
 ### a. Hecho verificable
 
-- **Convención de versión:** SemVer `vX.X.X`. Actual: **5.3.0**.
-- **Source of truth:** tag remoto (`v5.3.0`) + **triple mirror**
-  `lib/bug_bunny/version.rb` (`VERSION = '5.3.0'`) ← `bug_bunny.gemspec:7`
+- **Convención de versión:** SemVer `vX.X.X`. Actual: **5.4.0**.
+- **Source of truth:** tag remoto (`v5.4.0`) + **triple mirror**
+  `lib/bug_bunny/version.rb` (`VERSION = '5.4.0'`) ← `bug_bunny.gemspec:7`
   (`spec.version = BugBunny::VERSION`).
 - **Changelog canónico:** `CHANGELOG.md` único.
 - **Patrón de trigger:** `gema-tag` (patrón 1).
@@ -36,7 +37,7 @@ out-of-repo).
 
 - **Convención:** SemVer `vX.X.X` (**con `v`** — distinto al servicio).
 - **Source of truth:** tag remoto canónico (`git tag --sort=-v:refname` →
-  `v5.3.0`).
+  `v5.4.0`).
 - **Mirror:** `lib/bug_bunny/version.rb` (`VERSION`), leído por
   `bug_bunny.gemspec:7` (`spec.version = BugBunny::VERSION`).
   `required_ruby_version >= 2.6.0` (`bug_bunny.gemspec:17`).
