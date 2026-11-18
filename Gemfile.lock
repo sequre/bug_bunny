@@ -202,14 +202,14 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  activerecord (>= 6.1)
+  activerecord (>= 7.0)
   bug_bunny!
   bundler (>= 2.0)
   irb
   minitest (~> 5.0)
   minitest-reporters (~> 1.6)
   mocha (~> 2.0)
-  railties (>= 6.1)
+  railties (>= 7.0)
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop (~> 1.21)
