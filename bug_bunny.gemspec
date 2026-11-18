@@ -37,10 +37,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "connection_pool", ">= 2.4"
   spec.add_dependency "concurrent-ruby", "~> 1.3"
 
-  # Mantenemos >= para compatibilidad amplia con Rails, aunque RubyGems avise.
-  # Si quieres ser estricto usa "~> 7.0"
-  spec.add_dependency "activemodel", ">= 6.1"
-  spec.add_dependency "activesupport", ">= 6.1"
+  # Floor is Rails 7.0: BugBunny::Resource includes ActiveModel::API, which does not exist in 6.1. With 6.1
+  # Bundler resolved and the app crashed at boot (#67). Open upper bound on purpose (the fleet runs 7.0 to 8.1).
+  spec.add_dependency "activemodel", ">= 7.0"
+  spec.add_dependency "activesupport", ">= 7.0"
   spec.add_dependency "rack", ">= 2.0"
 
   # CORRECCIÓN: Agregamos versiones mínimas o rangos para evitar warnings
