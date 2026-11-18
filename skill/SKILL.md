@@ -19,7 +19,7 @@ Gema Ruby: capa de routing RESTful sobre AMQP/RabbitMQ. Microservicios se comuni
 
 ## Contrato resumido (piso mínimo)
 
-> Resume el contrato de **`bug_bunny` 5.3.0** (anclado a `v5.3.0`). Suficiente para el uso típico sin abrir el detalle; el detalle version-locked está en el **Índice de artefactos** de abajo. Antipatrones/API completa: más abajo (embebido interim, ver Cobertura y fronteras).
+> Resume el contrato de **`bug_bunny` 5.4.0** (anclado a `v5.4.0`). Suficiente para el uso típico sin abrir el detalle; el detalle version-locked está en el **Índice de artefactos** de abajo. Antipatrones/API completa: más abajo (embebido interim, ver Cobertura y fronteras).
 >
 > **Si venís de 5.1.x, un cambio de conducta (5.2.0):** una entrega cuyo middleware —o `handle_fatal_error`— levanta **antes del ack** ahora se **rechaza sin requeue** (evento `consumer.delivery_failed`), en `subscribe` y en `drain`. Antes quedaba sin ack ni reject y trababa el consumidor. Si un middleware levantaba a propósito para que el mensaje se reintentara, ahora el mensaje se pierde: el reintento es tuyo. Detalle en [`docs/behavior/behavior.md`](../docs/behavior/behavior.md).
 >
@@ -65,7 +65,7 @@ client.publish('events', body: { type: 'x' })   # => { 'status' => 202 }
 
 ## Índice de artefactos (fuente de verdad)
 
-El detalle vive en `docs/<capa>/` (modelo `dev-*`); esta skill **indexa y resume**, no duplica. Links relativos = version-locked (mismo tag del release, `v5.3.0`; `gemspec.files` incluye `docs/**`, así que estos archivos viajan dentro del `.gem` que ya tenés instalado).
+El detalle vive en `docs/<capa>/` (modelo `dev-*`); esta skill **indexa y resume**, no duplica. Links relativos = version-locked (mismo tag del release, `v5.4.0`; `gemspec.files` incluye `docs/**`, así que estos archivos viajan dentro del `.gem` que ya tenés instalado).
 
 | Capa | Artefacto | Estado |
 |---|---|---|
