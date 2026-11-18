@@ -50,12 +50,7 @@ module BugBunny
       end
     end
 
-    # 4. Rake tasks (bug_bunny:sync)
-    rake_tasks do
-      load File.expand_path('../tasks/bug_bunny.rake', __dir__)
-    end
-
-    # 5. Hook de Spring (Preloader)
+    # 4. Hook de Spring (Preloader)
     if defined?(Spring)
       Spring.after_fork do
         BugBunny.disconnect
